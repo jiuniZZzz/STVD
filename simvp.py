@@ -70,7 +70,8 @@ class SimVP(nn.Module):
 
 
 def train_simvp(
-    data_path,
+    data_path=None,
+    npy_path=None,
     input_frames=4,
     channels=3,
     hidden_channels=64,
@@ -80,8 +81,11 @@ def train_simvp(
     num_workers=2,
     save_path="simvp_checkpoint.pt",
 ):
+    resolved_path = data_path or npy_path
+    if not resolved_path:
+        raise ValueError("Either data_path or npy_path must be provided.")
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    dataset = SeaFogSTVDDataset(data_path, input_frames=input_frames)
+    dataset = SeaFogSTVDDataset(resolved_path, input_frames=input_frames)
     loader = DataLoader(dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers)
     model = SimVP(in_channels=channels, hid_channels=hidden_channels).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)

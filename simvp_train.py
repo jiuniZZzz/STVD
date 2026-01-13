@@ -23,7 +23,7 @@ def parse_args():
 if __name__ == "__main__":
     args = parse_args()
     train_simvp(
-        data_path=args.data,
+        npy_path=args.data,
         input_frames=args.input_frames,
         channels=args.channels,
         hidden_channels=args.hidden_channels,
