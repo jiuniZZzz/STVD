@@ -1,5 +1,10 @@
 import argparse
-from simvp import train_simvp
+import torch
+from torch.utils.data import DataLoader
+
+from data.seafog_dataset import SeaFogSTVDDataset
+from model.simvp import SimVP
+from trainer_utils import train_forecast_model
 
 
 def parse_args():
@@ -22,14 +27,19 @@ def parse_args():
 
 if __name__ == "__main__":
     args = parse_args()
-    train_simvp(
-        npy_path=args.data,
-        input_frames=args.input_frames,
-        channels=args.channels,
-        hidden_channels=args.hidden_channels,
+    dataset = SeaFogSTVDDataset(args.data, input_frames=args.input_frames)
+    dataloader = DataLoader(
+        dataset,
         batch_size=args.batch_size,
-        epochs=args.epochs,
-        lr=args.lr,
+        shuffle=True,
         num_workers=args.num_workers,
+    )
+    model = SimVP(in_channels=args.channels, hid_channels=args.hidden_channels)
+    optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
+    train_forecast_model(
+        model=model,
+        dataloader=dataloader,
+        epochs=args.epochs,
+        optimizer=optimizer,
         save_path=args.save_path,
     )
